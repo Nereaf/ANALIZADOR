@@ -1,90 +1,130 @@
 #include "ABB.h"
+#include "definiciones.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct Nodo{
-    elem elemento;
-    struct Nodo *izq;
-    struct Nodo *der;
+ struct celda ;
+typedef struct celda
+{
+    elem info;
+    struct celda *izq, *der;
+}Nodo;
+
+Nodo *ABB;
+
+
+//Funcion para recorrer recursivamente el arbol e insertar la celda 
+elem *insertarRecursivo(Nodo **celdaActual, char *lexemaActual, int compLex)
+{
+    //Si la celda actual no se encuentra vacia
+    if (*celdaActual != NULL)
+    {
+        int resultado;
+        //Si el lexema es el mismo que el de la celda
+        if ((resultado = strcmp(lexemaActual, (*celdaActual)->info.lexema)) == 0)
+        {
+            //Devolvemos el elemento
+            return &((*celdaActual)->info);
+        }
+        //En caso de que se encuentre a la izquierda
+        else if (resultado < 0)
+        {
+            //Llamamos recursivamente a la funcion indicando la celda izquierda
+            return insertarRecursivo(&(*celdaActual)->izq, lexemaActual, compLex);
+        }
+        //En caso de que se encuentre a la derecha
+        else if (resultado > 0)
+        {
+            //Llamamos recursivamente a la funcion indicando la celda derecha
+            return insertarRecursivo(&(*celdaActual)->der, lexemaActual, compLex);
+        }
+    }
+
+    //En el caso de que la celda actual se encuentre vacia
+    //Se inicializa una celda nueva
+    *celdaActual = (Nodo *)malloc(sizeof(Nodo));
+
+    //Se reserva memoria para el lexema indicado
+    (*celdaActual)->info.lexema = (char *)malloc(sizeof(char) * strlen(lexemaActual));
+
+    //Se copia el lexema
+    strcpy((*celdaActual)->info.lexema, lexemaActual);
+
+    //Actualizamos la informacion
+    (*celdaActual)->info.comLexico = compLex;
+    (*celdaActual)->der = NULL;
+    (*celdaActual)->izq = NULL;
+
+    //Devolvemos el elemento
+    return &((*celdaActual)->info);
+}
+elem *insertar(elem lex)
+{
+    //Insertamos un elemento y cambiamos su informacion
+    elem *l = insertarA(lex.lexema, lex.comLexico);
+
+
+    return l;
 }
 
-void crear(abin *A)
+//Funcion recursiva para liberar la memoria del arbol
+void borrarRecursivo(Nodo *celda)
 {
-	*A = NULL;
+    //Recorremos la celdas de izquierda a derecha recursivamente
+    if (celda->izq != NULL)
+    {
+        borrarRecursivo(celda->izq);
+    }
+
+    if (celda->der != NULL)
+    {
+        borrarRecursivo(celda->der);
+    }
+
+    //Liberamos la memoria del lexema y de la celda
+    free(celda->info.lexema);
+    free(celda);
 }
 
-unsigned esVacio(abin A)
+int borrarABB()
 {
-	return (A == NULL);
+    borrarRecursivo(ABB);
+    return 0;
 }
 
-abin izq(abin A)
+//Funcion recursiva para imprimir los lexema y los valores de las constantes y variables
+void imprimirRecursivo(Nodo *celda)
 {
-	return A->izq;
+    //Imprimimos de izquierda a derecha
+    if (celda->izq != NULL)
+    {
+        imprimirRecursivo(celda->izq);
+    }
+
+    if (celda->der != NULL)
+    {
+        imprimirRecursivo(celda->der);
+    }
+
+    //Si el elemento es una variable o constante imprimimos tambien su valor numerico
+    if (celda->info.comLexico == VAR_I || celda->info.comLexico == CONST_I)
+    {
+        //printf("\t%s = %.10g\n", celda->info.lexema, celda->info.valor.numero);
+		 printf("\t%s\n", celda->info.lexema);
+    }
+
+    //Para todos los demas casos solo imprimimos el lexema
+    else
+    {
+        printf("\t%s\n", celda->info.lexema);
+    }
+    return;
 }
 
-abin der(abin A)
+void imprimirABB()
 {
-	return A->der;
-}
-
-void leer(abin A, elem *E)
-{
-	*E = A->info;
-}
-
-void insertar(abin *A, elem E)
-{
-	if (esVacio(*A))
-	{
-		*A = (abin)malloc(sizeof(struct Nodo));
-		(*A)->info = E;
-		(*A)->izq = NULL;
-		(*A)->der = NULL;
-		return;
-	}
-	clave key = E.lexema;
-	int result;
-	if ((result = strcmp(key, (*A)->info.lexema)) > 0)
-	{
-		insertar(&(*A)->der, E);
-	}
-	else if (result < 0)
-	{
-		insertar(&(*A)->izq, E);
-	}
-}
-
-void buscar_nodo(abin A, clave key, elem *E)
-{
-	int result;
-	if (esVacio(A))
-	{
-		return;
-	}
-	if ((result = strcmp(key, A->info.lexema)) == 0)
-	{
-		*E = A->info;
-	}
-	else if (result < 0)
-	{
-		buscar_nodo(A->izq, key, E);
-	}
-	else
-	{
-		buscar_nodo(A->der, key, E);
-	}
-}
-
-void destruir(abin *A)
-{
-	if (!esVacio(*A))
-	{
-		free((*A)->info.lexema);
-		destruir(&((*A)->der));
-		destruir(&((*A)->izq));
-		free(*A);
-		*A = NULL;
-	}
+    printf("Arbol abb\n");
+    imprimirRecursivo(ABB);
 }
