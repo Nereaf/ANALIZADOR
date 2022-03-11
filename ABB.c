@@ -1,5 +1,4 @@
 #include "ABB.h"
-#include "definiciones.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,13 +59,12 @@ elem *insertarRecursivo(Nodo **celdaActual, char *lexemaActual, int compLex)
     //Devolvemos el elemento
     return &((*celdaActual)->info);
 }
-elem *insertar(elem lex)
+
+elem *insertar(char *lexemaActual, int compLex)
 {
-    //Insertamos un elemento y cambiamos su informacion
-    elem *l = insertarA(lex.lexema, lex.comLexico);
-
-
-    return l;
+    //Creamos una celda
+    Nodo **celdaActual = &ABB;
+    return insertarRecursivo(celdaActual, lexemaActual, compLex);
 }
 
 //Funcion recursiva para liberar la memoria del arbol
@@ -109,14 +107,14 @@ void imprimirRecursivo(Nodo *celda)
     }
 
     //Si el elemento es una variable o constante imprimimos tambien su valor numerico
-    if (celda->info.comLexico == VAR_I || celda->info.comLexico == CONST_I)
+   // if (celda->info.comLexico == VAR_I || celda->info.comLexico == CONST_I)
     {
         //printf("\t%s = %.10g\n", celda->info.lexema, celda->info.valor.numero);
 		 printf("\t%s\n", celda->info.lexema);
     }
 
     //Para todos los demas casos solo imprimimos el lexema
-    else
+//    else
     {
         printf("\t%s\n", celda->info.lexema);
     }
